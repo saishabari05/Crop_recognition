@@ -5,7 +5,7 @@ import { sendChatMessage } from '../services/api';
 import Button from './Button';
 import LlmRichText from './LlmRichText';
 
-function ChatWidget() {
+function ChatWidget({ position = 'bottom-right' }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -53,8 +53,14 @@ function ChatWidget() {
     }
   };
 
+  const positionClass =
+    position === 'bottom-left'
+      ? 'bottom-5 left-5'
+      : 'bottom-5 right-5';
+  const buttonAlignmentClass = position === 'bottom-left' ? '' : 'ml-auto';
+
   return (
-    <div className="fixed bottom-5 right-5 z-40 w-[300px]">
+    <div className={`fixed z-40 w-[300px] ${positionClass}`}>
       <AnimatePresence>
         {open && (
           <motion.div
@@ -103,7 +109,7 @@ function ChatWidget() {
           </motion.div>
         )}
       </AnimatePresence>
-      <Button className="ml-auto flex" onClick={() => setOpen((value) => !value)}>
+      <Button className={`${buttonAlignmentClass} flex`} onClick={() => setOpen((value) => !value)}>
         <Bot className="h-4 w-4" />
         {open ? 'Close' : 'Chat'}
         <ChevronUp className={`h-4 w-4 transition ${open ? '' : 'rotate-180'}`} />

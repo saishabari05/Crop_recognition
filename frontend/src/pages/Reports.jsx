@@ -1,4 +1,4 @@
-﻿import { Download, Search } from 'lucide-react';
+import { Download, FileImage, MapPin, Search, ShieldCheck, Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import AppFrame from '../components/AppFrame';
 import Badge from '../components/Badge';
@@ -78,17 +78,26 @@ function Reports() {
           const farmForReport = getFarmForReport(report);
           return (
             <Card key={report.id}>
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-text-muted">{report.id}</p>
-                  <h3 className="mt-3 text-3xl">{report.crop} Disease Report</h3>
-                  <p className="mt-2 text-sm text-text-mid">{formatDate(report.reportDate)} • {report.locationName ?? 'Unknown location'}</p>
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-sm uppercase tracking-[0.2em] text-text-muted">{report.id}</p>
+                    <Badge variant="info">{report.status ?? 'Completed'}</Badge>
+                  </div>
+                  <div>
+                    <h3 className="text-3xl">{report.crop} Disease Report</h3>
+                    <p className="mt-2 text-sm text-text-mid">{formatDate(report.reportDate)} - {report.locationName ?? 'Unknown location'}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-3 text-sm text-text-mid">
+                    <span className="rounded-full bg-beige px-3 py-1.5">{report.disease ?? 'Unknown disease'}</span>
+                    <span className="rounded-full bg-beige px-3 py-1.5">{report.confidence ?? 0}% confidence</span>
+                    {report.imageName && <span className="rounded-full bg-beige px-3 py-1.5">{report.imageName}</span>}
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <Badge variant={report.severity === 'High' ? 'danger' : report.severity === 'Moderate' ? 'warning' : 'success'}>
                     {report.severity}
                   </Badge>
-                  <Badge variant="info">{report.status ?? 'Completed'}</Badge>
                   {farmForReport?.email && (
                     <a href={`mailto:${farmForReport.email}?subject=${encodeURIComponent(`${report.crop} disease report`)}&body=${encodeURIComponent(report.summary ?? '')}`}>
                       <Button variant="secondary">Send email</Button>
@@ -120,7 +129,6 @@ function Reports() {
       <Modal isOpen={Boolean(selected)} onClose={() => setSelected(null)} title={selected ? `${selected.id} - ${selected.crop} Report` : 'Report details'}>
         {selected && (
           <div className="space-y-6">
-            {/* Key Metrics */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-2xl bg-beige p-4">
                 <p className="text-xs uppercase tracking-wide text-text-muted">Disease</p>
@@ -134,37 +142,108 @@ function Reports() {
                 <p className="text-xs uppercase tracking-wide text-text-muted">Severity</p>
                 <p className="mt-2 text-lg font-semibold text-text-dark">{selected.severity ?? 'Unknown'}</p>
               </div>
-              <div className="rounded-2xl bg-white border border-[#e8e1d7] p-4">
+              <div className="rounded-2xl border border-[#e8e1d7] bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-text-muted">Location</p>
-                <p className="mt-2 text-sm font-semibold text-text-dark truncate">{selected.locationName ?? 'Unknown'}</p>
+                <p className="mt-2 truncate text-sm font-semibold text-text-dark">{selected.locationName ?? 'Unknown'}</p>
               </div>
             </div>
 
-            {/* Report Info */}
-            <div className="rounded-2xl bg-gray-50 p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-text-muted">Report ID</p>
-                <p className="font-mono text-sm font-medium">{selected.id}</p>
+            <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
+              <div className="rounded-[28px] border border-[#ddd1bf] bg-white p-4 shadow-[0_18px_40px_-32px_rgba(49,82,55,0.45)]">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
+                  <FileImage className="h-4 w-4" />
+                  Uploaded image
+                </div>
+                <div className="mt-4 overflow-hidden rounded-[24px] border border-dashed border-[#d8c9b5] bg-[#f9f5ee] p-3">
+                  {selected.imagePreviewUrl ? (
+                    <img
+                      src={selected.imagePreviewUrl}
+                      alt={selected.imageName ?? `${selected.crop} upload`}
+                      className="h-64 w-full rounded-[18px] object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-64 items-center justify-center rounded-[18px] bg-beige text-sm text-text-muted">
+                      Uploaded image preview not available
+                    </div>
+                  )}
+                </div>
+                <div className="mt-4 rounded-2xl bg-beige px-4 py-3 text-sm text-text-dark">
+                  <p className="text-xs uppercase tracking-[0.18em] text-text-muted">Image name</p>
+                  <p className="mt-1 truncate font-medium">{selected.imageName ?? 'Unknown image'}</p>
+                </div>
               </div>
-              <div className="flex items-center justify-between border-t border-gray-200 pt-3">
-                <p className="text-sm text-text-muted">Date</p>
-                <p className="text-sm font-medium">{formatDate(selected.reportDate)}</p>
-              </div>
-              <div className="flex items-center justify-between border-t border-gray-200 pt-3">
-                <p className="text-sm text-text-muted">Crop</p>
-                <p className="text-sm font-medium">{selected.crop}</p>
+
+              <div className="space-y-5">
+                <div className="space-y-3 rounded-[28px] bg-gray-50 p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-text-muted">Report ID</p>
+                    <p className="font-mono text-sm font-medium">{selected.id}</p>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-gray-200 pt-3">
+                    <p className="text-sm text-text-muted">Date</p>
+                    <p className="text-sm font-medium">{formatDate(selected.reportDate)}</p>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-gray-200 pt-3">
+                    <p className="text-sm text-text-muted">Crop</p>
+                    <p className="text-sm font-medium">{selected.crop}</p>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-gray-200 pt-3">
+                    <p className="text-sm text-text-muted">Field</p>
+                    <p className="text-sm font-medium">{selected.locationName ?? 'Unknown location'}</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl bg-moss-pale p-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-moss">
+                      <ShieldCheck className="h-4 w-4" />
+                      Severity
+                    </div>
+                    <p className="mt-3 text-lg font-semibold text-text-dark">{selected.severity ?? 'Unknown'}</p>
+                  </div>
+                  <div className="rounded-2xl bg-beige p-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-text-dark">
+                      <Sparkles className="h-4 w-4" />
+                      AI confidence
+                    </div>
+                    <p className="mt-3 text-lg font-semibold text-text-dark">{selected.confidence ?? 0}%</p>
+                  </div>
+                  <div className="rounded-2xl bg-earth-50 p-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-text-dark">
+                      <MapPin className="h-4 w-4" />
+                      Source
+                    </div>
+                    <p className="mt-3 text-sm font-semibold text-text-dark">{selected.imageName ?? 'Mobile upload'}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Summary & Recommendation */}
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-3">Analysis & Recommendation</p>
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-text-muted">Analysis & Recommendation</p>
               <div className="rounded-2xl bg-moss-pale p-4">
                 <LlmRichText text={selected.summary ?? selected.recommendation ?? 'No analysis available.'} compact />
               </div>
             </div>
 
-            {/* Download Button */}
+            {matchedFarm && (matchedFarm.email || matchedFarm.phone) && (
+              <div className="rounded-2xl bg-[#f7f2e8] p-4">
+                <p className="text-sm font-semibold uppercase tracking-wide text-text-muted">Share with farmer</p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {matchedFarm.email && (
+                    <a href={`mailto:${matchedFarm.email}?subject=${encodeURIComponent(`${selected.crop} disease report`)}&body=${encodeURIComponent(selected.summary ?? '')}`}>
+                      <Button variant="secondary">Email report</Button>
+                    </a>
+                  )}
+                  {matchedFarm.phone && (
+                    <a href={`https://wa.me/${matchedFarm.phone.replace(/\D/g, '')}?text=${encodeURIComponent(selected.summary ?? '')}`} target="_blank" rel="noreferrer">
+                      <Button variant="secondary">WhatsApp report</Button>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <Button onClick={() => handleDownload(selected)} className="flex-1">
                 <Download className="h-4 w-4" />

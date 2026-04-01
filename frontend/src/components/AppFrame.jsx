@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ChatWidget from './ChatWidget';
 import Sidebar, { DashboardTopbar } from './Sidebar';
 
-function AppFrame({ title, subtitle, children, withChat = true }) {
+function AppFrame({ title, subtitle, children, withChat = true, chatPosition }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -12,7 +12,7 @@ function AppFrame({ title, subtitle, children, withChat = true }) {
         <DashboardTopbar title={title} subtitle={subtitle} onOpenMenu={() => setOpen(true)} />
         {children}
       </div>
-      {withChat && <ChatWidget />}
+      {withChat && <ChatWidget position={chatPosition} />}
     </div>
   );
 }

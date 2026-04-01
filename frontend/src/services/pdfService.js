@@ -83,13 +83,89 @@ function addWrappedLines(doc, lines, startY, options = {}) {
   return yPosition;
 }
 
-export function downloadReportPdf(report) {
+function loadImageForPdf(src) {
+  return new Promise((resolve, reject) => {
+    if (!src) {
+      resolve(null);
+      return;
+    }
+
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth || image.width;
+      canvas.height = image.naturalHeight || image.height;
+      const context = canvas.getContext('2d');
+
+      if (!context) {
+        resolve(null);
+        return;
+      }
+
+      context.drawImage(image, 0, 0);
+      resolve({
+        dataUrl: canvas.toDataURL('image/jpeg', 0.92),
+        width: canvas.width,
+        height: canvas.height,
+      });
+    };
+    image.onerror = reject;
+    image.src = src;
+  });
+}
+
+function addReportImage(doc, image, imageName, startY, options = {}) {
+  if (!image) return startY;
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = options.margin ?? 15;
+  const frameWidth = options.frameWidth ?? 72;
+  const frameHeight = options.frameHeight ?? 58;
+  let yPosition = startY;
+
+  if (yPosition + frameHeight + 20 > pageHeight - 15) {
+    doc.addPage();
+    yPosition = margin;
+  }
+
+  const xPosition = pageWidth - margin - frameWidth;
+  doc.setFillColor(252, 249, 243);
+  doc.setDrawColor(205, 192, 174);
+  doc.roundedRect(xPosition, yPosition, frameWidth, frameHeight, 4, 4, 'FD');
+
+  const imageRatio = image.width / image.height;
+  const frameRatio = frameWidth / frameHeight;
+  let drawWidth = frameWidth - 6;
+  let drawHeight = frameHeight - 6;
+
+  if (imageRatio > frameRatio) {
+    drawHeight = drawWidth / imageRatio;
+  } else {
+    drawWidth = drawHeight * imageRatio;
+  }
+
+  const imageX = xPosition + (frameWidth - drawWidth) / 2;
+  const imageY = yPosition + (frameHeight - drawHeight) / 2;
+  doc.addImage(image.dataUrl, 'JPEG', imageX, imageY, drawWidth, drawHeight);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(110, 110, 110);
+  const caption = doc.splitTextToSize(safeText(imageName, 'uploaded-image'), frameWidth);
+  doc.text(caption, xPosition + frameWidth / 2, yPosition + frameHeight + 6, { align: 'center' });
+
+  return yPosition + frameHeight + caption.length * 3 + 6;
+}
+
+export async function downloadReportPdf(report) {
   try {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 15;
     let yPosition = 15;
+    const reportImage = await loadImageForPdf(report?.imagePreviewUrl).catch(() => null);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(20);
@@ -123,9 +199,15 @@ export function downloadReportPdf(report) {
         ['Location (Geocoded):', report?.locationName || 'Village, District, State'],
         ['GPS Coordinates:', formatCoordinates(report?.coordinates)],
         ['Image Source:', 'Mobile Camera / Drone'],
+        ['Image Name:', safeText(report?.imageName, 'Not available')],
       ],
       yPosition,
     );
+
+    if (reportImage) {
+      yPosition += 2;
+      yPosition = addReportImage(doc, reportImage, report?.imageName, yPosition, { margin });
+    }
 
     yPosition += 3;
     if (yPosition > pageHeight - 50) {

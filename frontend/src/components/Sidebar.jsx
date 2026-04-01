@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BellRing,
-  Bell,
   Bot,
   FileText,
   LandPlot,
@@ -35,12 +34,12 @@ function SidebarContent({ onClose }) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="AgriVision logo" className="h-12 w-12 rounded-2xl bg-white p-1 object-contain shadow-md" />
-          <div>
-            <p className="text-[1.8rem] font-semibold leading-none tracking-[-0.02em] text-text-dark">AgriVision</p>
-            <p className="text-[11px] uppercase tracking-[0.22em] text-text-muted">Crop Intelligence OS</p>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div className="min-w-0 flex items-center gap-3">
+          <img src={logo} alt="AgriVision logo" className="h-11 w-11 flex-shrink-0 rounded-2xl bg-white p-1 object-contain shadow-md" />
+          <div className="min-w-0">
+            <p className="truncate text-[1.15rem] font-semibold leading-tight tracking-[-0.02em] text-text-dark">AgriVision</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-text-muted">Crop Intelligence OS</p>
           </div>
         </div>
         {onClose && (
@@ -80,17 +79,19 @@ function SidebarContent({ onClose }) {
         ))}
       </nav>
 
-      <div className="mt-auto rounded-3xl bg-text-dark p-4 text-white">
+      <div className="mt-auto pt-5">
+        <div className="rounded-3xl bg-text-dark p-5 text-white">
         <button
           onClick={async () => {
             await logout();
             navigate('/login');
           }}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-white/10 px-4 py-3 text-sm font-semibold"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-white/10 px-4 py-3 text-sm font-semibold"
         >
           <LogOut className="h-4 w-4" />
           Log out
         </button>
+        </div>
       </div>
     </div>
   );
@@ -128,13 +129,14 @@ function Sidebar({ open, onClose }) {
 }
 
 export function DashboardTopbar({ title, subtitle, onOpenMenu }) {
+  const navigate = useNavigate();
+
   return (
     <div className="glass mb-6 flex items-center justify-between px-5 py-4">
       <div className="flex items-center gap-3">
         <button onClick={onOpenMenu} className="rounded-full bg-moss-pale p-3 text-moss lg:hidden">
           <LayoutDashboard className="h-4 w-4" />
         </button>
-        <img src={logo} alt="AgriVision logo" className="hidden h-12 w-12 rounded-2xl bg-white p-1 object-contain shadow-sm sm:block" />
         <div>
           <p className="panel-label">Operations workspace</p>
           <h1 className="mt-1 text-[2rem] leading-none text-text-dark">{title}</h1>
@@ -148,13 +150,12 @@ export function DashboardTopbar({ title, subtitle, onOpenMenu }) {
           </p>
           <p className="text-xs text-text-muted">Live field snapshot</p>
         </div>
-        <button className="relative rounded-full bg-moss-pale p-3 text-moss">
-          <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-clay" />
-          <Bell className="h-4 w-4" />
-        </button>
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-moss text-sm font-semibold text-white">
+        <button
+          onClick={() => navigate('/profile')}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-moss text-sm font-semibold text-white"
+        >
           AV
-        </div>
+        </button>
       </div>
     </div>
   );

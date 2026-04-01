@@ -80,7 +80,7 @@ function Heatmap() {
                     </div>
                   }
                 >
-                  <CropMap points={points} />
+                  <CropMap points={points} activePointId={selectedPoint?.id} />
                 </MapErrorBoundary>
               </div>
             ) : (
@@ -115,7 +115,16 @@ function Heatmap() {
         {!!points.length && (
           <div className="grid gap-4 lg:grid-cols-3">
             {points.slice(0, 3).map((point) => (
-              <Card key={point.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedPoint(point)}>
+              <Card
+                key={point.id}
+                className="cursor-pointer transition-shadow hover:shadow-md"
+                onClick={() => {
+                  setSelectedPoint(point);
+                  window.requestAnimationFrame(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  });
+                }}
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="panel-label">{point.crop}</p>
