@@ -5,9 +5,11 @@ import AppFrame from '../components/AppFrame';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import Card from '../components/Card';
+import LlmRichText from '../components/LlmRichText';
 import UploadZone from '../components/UploadZone';
 import { useAuth } from '../context/AuthContext';
 import { generateReport, uploadLeafImage } from '../services/api';
+import { downloadReportPdf } from '../services/pdfService';
 
 function Upload() {
   const { addReport, addUploadResult, farms } = useAuth();
@@ -69,7 +71,16 @@ function Upload() {
       addReport(reportRecord);
 
       window.localStorage.setItem('agrivision_last_session_id', response.session_id);
-      setResult({ ...response, confidencePercent: Number((response.confidence * 100).toFixed(2)) });
+      setResult({
+        ...reportRecord,
+        confidence: Number((response.confidence * 100).toFixed(2)),
+        confidencePercent: Number((response.confidence * 100).toFixed(2)),
+        healthScore: response.health_score,
+        weather: response.weather,
+        coordinates: [response?.lat ?? null, response?.lon ?? null],
+        recommendation: response.recommendation,
+        summary: response.recommendation,
+      });
       setSubmitted(true);
     } catch (apiError) {
       setError(apiError.message || 'Failed to analyze image.');
@@ -165,14 +176,18 @@ function Upload() {
                   </div>
                   <div className="flex flex-col rounded-2xl bg-beige p-4">
                     <p className="text-sm text-text-muted">Recommended action</p>
-                    <p className="mt-2 flex-1 text-sm leading-6 text-text-mid overflow-y-auto">{result.recommendation}</p>
+                    <LlmRichText
+                      text={result.recommendation}
+                      className="mt-2 flex-1 overflow-y-auto"
+                      compact
+                    />
                   </div>
                 </div>
               </Card>
           </div>
-          <Button className="mt-6">
+          <Button className="mt-6" onClick={() => downloadReportPdf(result)}>
             <Download className="h-4 w-4" />
-            Report generated in backend
+            Download PDF report
           </Button>
         </motion.div>
       )}

@@ -1,6 +1,7 @@
 import {
   Activity,
   ArrowUpRight,
+  Download,
   FileText,
   LandPlot,
   Sparkles,
@@ -13,10 +14,13 @@ import Badge from '../components/Badge';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import MetricCard from '../components/MetricCard';
+import { useAuth } from '../context/AuthContext';
 import { fetchDashboard } from '../services/api';
+import { downloadReportPdf } from '../services/pdfService';
 
 function Dashboard() {
   const [dashboard, setDashboard] = useState(null);
+  const { reports } = useAuth();
 
   useEffect(() => {
     fetchDashboard()
@@ -36,6 +40,23 @@ function Dashboard() {
   }, [dashboard]);
 
   const latestItem = dashboard?.topDiseases?.[0] ?? null;
+  const latestReport = useMemo(() => {
+    if (!latestItem) {
+      return reports[0] ?? null;
+    }
+
+    return (
+      reports.find((report) => report.sessionId && report.sessionId === latestItem.sessionId) ??
+      reports.find(
+        (report) =>
+          report.crop === latestItem.crop &&
+          report.disease === latestItem.disease &&
+          report.locationName === latestItem.locationName,
+      ) ??
+      reports[0] ??
+      null
+    );
+  }, [latestItem, reports]);
 
   return (
     <AppFrame title="Welcome back, Aarav" subtitle="A live agricultural intelligence workspace across farms, alerts, spread zones, and AI guidance.">
@@ -68,6 +89,17 @@ function Dashboard() {
                 <p className="mt-3 text-xl font-semibold tracking-[-0.02em] text-text-dark">{latestItem?.confidence ?? 0}%</p>
               </div>
             </div>
+            {latestReport && (
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Button onClick={() => downloadReportPdf(latestReport)}>
+                  <Download className="h-4 w-4" />
+                  Download latest PDF
+                </Button>
+                <Link to="/reports">
+                  <Button variant="secondary">Open reports</Button>
+                </Link>
+              </div>
+            )}
           </Card>
 
           <Card>

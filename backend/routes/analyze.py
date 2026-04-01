@@ -107,7 +107,6 @@ async def analyze_image(
                 "Please review the alerts and consult a local agronomist for treatment guidance."
             )
     else:
-        alerts.append("Low confidence prediction. Please upload a clearer image for better accuracy.")
         recommendation = (
             "Confidence is below threshold. Please retake a clear photo in good lighting and consult a local agronomist if symptoms worsen."
         )

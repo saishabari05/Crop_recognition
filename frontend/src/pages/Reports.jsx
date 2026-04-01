@@ -4,6 +4,7 @@ import AppFrame from '../components/AppFrame';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import Card from '../components/Card';
+import LlmRichText from '../components/LlmRichText';
 import Modal from '../components/Modal';
 import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
@@ -158,8 +159,8 @@ function Reports() {
             {/* Summary & Recommendation */}
             <div>
               <p className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-3">Analysis & Recommendation</p>
-              <div className="rounded-2xl bg-moss-pale p-4 text-sm leading-relaxed text-text-dark">
-                {selected.summary ?? selected.recommendation ?? 'No analysis available.'}
+              <div className="rounded-2xl bg-moss-pale p-4">
+                <LlmRichText text={selected.summary ?? selected.recommendation ?? 'No analysis available.'} compact />
               </div>
             </div>
 

@@ -3,6 +3,7 @@ import { Bot, ChevronUp, SendHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { sendChatMessage } from '../services/api';
 import Button from './Button';
+import LlmRichText from './LlmRichText';
 
 function ChatWidget() {
   const [open, setOpen] = useState(false);
@@ -76,7 +77,11 @@ function ChatWidget() {
                       : 'ml-auto bg-moss text-white'
                   }`}
                 >
-                  {message.content}
+                  <LlmRichText
+                    text={message.content}
+                    tone={message.role === 'assistant' ? 'chat-assistant' : 'chat-user'}
+                    compact
+                  />
                 </div>
               ))}
             </div>

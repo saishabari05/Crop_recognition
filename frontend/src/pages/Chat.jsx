@@ -2,6 +2,7 @@ import { Bot, Leaf, MapPinned, Search, SendHorizontal, TriangleAlert, FileText }
 import { useState } from 'react';
 import logo from '../assets/logo.png';
 import AppFrame from '../components/AppFrame';
+import LlmRichText from '../components/LlmRichText';
 import { sendChatMessage } from '../services/api';
 
 const suggestions = [
@@ -149,7 +150,11 @@ function Chat() {
                   message.role === 'assistant' ? 'bg-moss-pale text-text-dark' : 'ml-auto bg-moss text-white'
                 }`}
               >
-                {message.content}
+                <LlmRichText
+                  text={message.content}
+                  tone={message.role === 'assistant' ? 'chat-assistant' : 'chat-user'}
+                  compact
+                />
               </div>
             ))}
             {thinking && (

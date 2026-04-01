@@ -6,6 +6,8 @@ import Badge from '../components/Badge';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import CropMap from '../components/CropMap';
+import LlmRichText from '../components/LlmRichText';
+import MapErrorBoundary from '../components/MapErrorBoundary';
 import Modal from '../components/Modal';
 import { useAuth } from '../context/AuthContext';
 
@@ -67,7 +69,19 @@ function Heatmap() {
                   if (clickedPoint) setSelectedPoint(clickedPoint);
                 }
               }}>
-                <CropMap points={points} />
+                <MapErrorBoundary
+                  fallback={
+                    <div className="flex min-h-[360px] flex-col items-center justify-center rounded-[1.8rem] border border-dashed border-earth-200 bg-earth-50 px-6 text-center">
+                      <TriangleAlert className="h-8 w-8 text-amber-600" />
+                      <h3 className="mt-4 text-xl font-semibold tracking-[-0.02em] text-text-dark">Map could not load</h3>
+                      <p className="mt-2 max-w-md text-sm leading-7 text-text-mid">
+                        The heatmap component hit a rendering issue. Refresh the page and try again.
+                      </p>
+                    </div>
+                  }
+                >
+                  <CropMap points={points} />
+                </MapErrorBoundary>
               </div>
             ) : (
               <div className="flex min-h-[360px] flex-col items-center justify-center rounded-[1.8rem] border border-dashed border-earth-200 bg-earth-50 px-6 text-center">
@@ -141,7 +155,7 @@ function Heatmap() {
             {selectedPoint.summary && (
               <div className="rounded-2xl bg-moss-pale p-5">
                 <p className="text-sm font-semibold uppercase tracking-[0.16em] text-moss">Summary</p>
-                <p className="mt-3 text-sm leading-6 text-text-dark">{selectedPoint.summary}</p>
+                <LlmRichText text={selectedPoint.summary} className="mt-3" compact />
               </div>
             )}
 

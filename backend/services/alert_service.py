@@ -13,7 +13,7 @@ def generate_alerts(confidence: float, disease: str, severity: str, location: Op
     if "blight" in disease.lower():
         alerts.append("Disease may spread quickly in humid conditions.")
 
-    if location:
+    if location and location.strip().lower() != "unknown":
         alerts.append(f"Monitor nearby fields in {location} for similar symptoms.")
 
     return alerts

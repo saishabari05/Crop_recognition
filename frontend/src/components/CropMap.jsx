@@ -1,10 +1,11 @@
 import L from 'leaflet';
+import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 import { severityColor } from '../utils/formatters';
 
 function colorForSeverity(severity) {
-  if (severity === 'High') return '#be123c';
-  if (severity === 'Moderate') return '#b45309';
+  if (String(severity).toLowerCase() === 'high') return '#be123c';
+  if (String(severity).toLowerCase() === 'moderate') return '#b45309';
   return '#15803d';
 }
 
@@ -20,14 +21,42 @@ function iconForSeverity(severity) {
 }
 
 function CropMap({ points }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  const validPoints = useMemo(
+    () =>
+      (points ?? []).filter(
+        (point) =>
+          Array.isArray(point.coordinates) &&
+          point.coordinates.length === 2 &&
+          point.coordinates.every((value) => typeof value === 'number'),
+      ),
+    [points],
+  );
+
+  if (!mounted) {
+    return <div className="h-[360px] rounded-[1.5rem] bg-earth-50" />;
+  }
+
   return (
-    <div className="glass-panel h-[360px] overflow-hidden p-3">
-      <MapContainer center={[20.5937, 78.9629]} zoom={4} scrollWheelZoom={false}>
+    <div className="h-[360px] overflow-hidden rounded-[1.5rem] border border-[#d9d4c8] bg-white p-3 shadow-sm">
+      <MapContainer
+        key={`heatmap-${validPoints.length}`}
+        center={[20.5937, 78.9629]}
+        zoom={4}
+        scrollWheelZoom={false}
+        className="h-full w-full rounded-[1.2rem]"
+      >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {points.map((point) => (
+        {validPoints.map((point) => (
           <Marker key={point.id} position={point.coordinates} icon={iconForSeverity(point.severity)}>
             <Popup>
               <div className="space-y-2">
