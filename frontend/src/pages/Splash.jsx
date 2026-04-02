@@ -1,16 +1,7 @@
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 
 function Splash() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => navigate('/'), 2500);
-    return () => window.clearTimeout(timer);
-  }, [navigate]);
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-cream px-6">
       <div className="text-center">
@@ -20,7 +11,7 @@ function Splash() {
           transition={{ duration: 1.1, ease: 'easeOut' }}
           src={logo}
           alt="AgriVision logo"
-          className="mx-auto h-28 w-28 rounded-[2rem] bg-white p-2 object-contain shadow-xl"
+          className="mx-auto h-28 w-28 rounded-[2rem] bg-cream p-2 object-contain shadow-xl"
         />
         <motion.h1
           initial={{ opacity: 0, y: 10 }}

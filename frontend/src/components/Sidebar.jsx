@@ -59,7 +59,7 @@ function SidebarContent({ onClose }) {
         </div>
       </div>
 
-      <nav className="space-y-2 overflow-hidden">
+      <nav className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
         {items.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
@@ -79,8 +79,8 @@ function SidebarContent({ onClose }) {
         ))}
       </nav>
 
-      <div className="mt-auto pt-5">
-        <div className="rounded-3xl bg-text-dark p-5 text-white">
+      <div className="mt-4 pt-3">
+        <div className="rounded-3xl bg-text-dark p-4 text-white">
         <button
           onClick={async () => {
             await logout();
@@ -130,6 +130,15 @@ function Sidebar({ open, onClose }) {
 
 export function DashboardTopbar({ title, subtitle, onOpenMenu }) {
   const navigate = useNavigate();
+  const { previewProfile } = useAuth();
+
+  const initials =
+    String(previewProfile?.name ?? 'AV')
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join('') || 'AV';
 
   return (
     <div className="glass mb-6 flex items-center justify-between px-5 py-4">
@@ -152,9 +161,13 @@ export function DashboardTopbar({ title, subtitle, onOpenMenu }) {
         </div>
         <button
           onClick={() => navigate('/profile')}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-moss text-sm font-semibold text-white"
+          className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-moss text-sm font-semibold text-white"
         >
-          AV
+          {previewProfile?.avatar ? (
+            <img src={previewProfile.avatar} alt={previewProfile?.name ?? 'Profile'} className="h-full w-full object-cover" />
+          ) : (
+            initials
+          )}
         </button>
       </div>
     </div>

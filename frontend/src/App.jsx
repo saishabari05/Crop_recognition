@@ -20,20 +20,20 @@ function App() {
   const location = useLocation();
   const { isAuthenticated, splashComplete } = useAuth();
 
+  if (!splashComplete) {
+    return <Splash />;
+  }
+
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route
           path="/"
           element={
-            splashComplete ? (
-              isAuthenticated ? (
-                <Navigate to="/overview" replace />
-              ) : (
-                <Landing />
-              )
+            isAuthenticated ? (
+              <Navigate to="/overview" replace />
             ) : (
-              <Splash />
+              <Landing />
             )
           }
         />

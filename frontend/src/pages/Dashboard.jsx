@@ -129,7 +129,7 @@ function Dashboard() {
         </div>
 
         <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-          <Card>
+          <Card className="min-w-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="panel-label">Weekly detections</p>
@@ -151,7 +151,7 @@ function Dashboard() {
             </div>
           </Card>
 
-          <Card>
+          <Card className="min-w-0">
             <div className="flex items-center justify-between">
               <div>
                 <p className="panel-label">Live alerts</p>
@@ -172,8 +172,8 @@ function Dashboard() {
                       <div className="flex items-start gap-3 min-w-0">
                         <span className={`mt-1 flex-shrink-0 h-2.5 w-2.5 rounded-full ${tone === 'danger' ? 'bg-rose-500' : tone === 'warning' ? 'bg-amber-500' : 'bg-moss'}`} />
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-text-dark truncate">{item.locationName ?? 'Unknown'}</p>
-                          <p className="mt-1 text-sm leading-5 text-text-mid truncate">{item.disease ?? 'Unknown'}</p>
+                          <p className="break-words text-sm font-medium leading-6 text-text-dark">{item.locationName ?? 'Unknown'}</p>
+                          <p className="mt-1 break-words text-sm leading-5 text-text-mid">{item.disease ?? 'Unknown'}</p>
                         </div>
                       </div>
                       <Badge variant={tone} className="flex-shrink-0">{tone}</Badge>

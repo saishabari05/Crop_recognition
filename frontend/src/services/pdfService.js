@@ -120,8 +120,8 @@ function addReportImage(doc, image, imageName, startY, options = {}) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = options.margin ?? 15;
-  const frameWidth = options.frameWidth ?? 72;
-  const frameHeight = options.frameHeight ?? 58;
+  const frameWidth = options.frameWidth ?? 110;
+  const frameHeight = options.frameHeight ?? 76;
   let yPosition = startY;
 
   if (yPosition + frameHeight + 20 > pageHeight - 15) {
@@ -129,7 +129,7 @@ function addReportImage(doc, image, imageName, startY, options = {}) {
     yPosition = margin;
   }
 
-  const xPosition = pageWidth - margin - frameWidth;
+  const xPosition = (pageWidth - frameWidth) / 2;
   doc.setFillColor(252, 249, 243);
   doc.setDrawColor(205, 192, 174);
   doc.roundedRect(xPosition, yPosition, frameWidth, frameHeight, 4, 4, 'FD');
@@ -206,7 +206,11 @@ export async function downloadReportPdf(report) {
 
     if (reportImage) {
       yPosition += 2;
-      yPosition = addReportImage(doc, reportImage, report?.imageName, yPosition, { margin });
+      yPosition = addReportImage(doc, reportImage, report?.imageName, yPosition, {
+        margin,
+        frameWidth: 110,
+        frameHeight: 76,
+      });
     }
 
     yPosition += 3;

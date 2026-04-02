@@ -14,8 +14,6 @@ const emptyFarmForm = {
   crop: 'Tomato',
   acreage: '',
   location: '',
-  risk: 'Moderate',
-  alerts: '0',
   phone: '',
   email: '',
 };
@@ -52,8 +50,6 @@ function Farms() {
       crop: farm.crop ?? 'Tomato',
       acreage: farm.acreage ?? '',
       location: farm.location ?? '',
-      risk: farm.risk ?? 'Moderate',
-      alerts: String(farm.alerts ?? 0),
       phone: farm.phone ?? '',
       email: farm.email ?? '',
     });
@@ -76,8 +72,8 @@ function Farms() {
       crop: form.crop.trim(),
       acreage: form.acreage.trim() || '0 acres',
       location: form.location.trim(),
-      risk: form.risk,
-      alerts: Number(form.alerts || 0),
+      risk: editingFarm?.risk ?? 'Low',
+      alerts: editingFarm?.alerts ?? 0,
       phone: form.phone.trim(),
       email: form.email.trim(),
       updated: 'Updated just now',
@@ -278,12 +274,6 @@ function Farms() {
             <input className="field" placeholder="Crop type" value={form.crop} onChange={(event) => setForm((current) => ({ ...current, crop: event.target.value }))} />
             <input className="field" placeholder="Acreage" value={form.acreage} onChange={(event) => setForm((current) => ({ ...current, acreage: event.target.value }))} />
             <input className="field sm:col-span-2" placeholder="Location" value={form.location} onChange={(event) => setForm((current) => ({ ...current, location: event.target.value }))} />
-            <select className="field" value={form.risk} onChange={(event) => setForm((current) => ({ ...current, risk: event.target.value }))}>
-              <option>Low</option>
-              <option>Moderate</option>
-              <option>High</option>
-            </select>
-            <input className="field" placeholder="Active alerts" value={form.alerts} onChange={(event) => setForm((current) => ({ ...current, alerts: event.target.value }))} />
             <input className="field" placeholder="Phone" value={form.phone} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} />
             <input className="field" placeholder="Email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
           </div>

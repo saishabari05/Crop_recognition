@@ -19,28 +19,39 @@ export function AuthProvider({ children }) {
   const [reports, setReports] = useState([]);
   const [farms, setFarms] = useState([]);
 
+  const clearSessionData = () => {
+    setProfile(null);
+    setUploads([]);
+    setReports([]);
+    setFarms([]);
+  };
+
+  const loadAuthenticatedData = async () => {
+    const results = await Promise.allSettled([fetchProfile(), fetchUploads(), fetchReports(), fetchFarms()]);
+    const [profileResult, uploadsResult, reportsResult, farmsResult] = results;
+
+    setProfile(profileResult.status === 'fulfilled' ? profileResult.value : null);
+    setUploads(uploadsResult.status === 'fulfilled' && Array.isArray(uploadsResult.value?.items) ? uploadsResult.value.items : []);
+    setReports(reportsResult.status === 'fulfilled' && Array.isArray(reportsResult.value?.items) ? reportsResult.value.items : []);
+    setFarms(farmsResult.status === 'fulfilled' && Array.isArray(farmsResult.value?.items) ? farmsResult.value.items : []);
+  };
+
   useEffect(() => {
     const splashTimer = window.setTimeout(() => setSplashComplete(true), 2200);
     const storedUser = window.localStorage.getItem('agrivision_user');
 
-    if (storedUser) setUser(JSON.parse(storedUser));
-
-    Promise.allSettled([fetchProfile(), fetchUploads(), fetchReports(), fetchFarms()]).then((results) => {
-      const [profileResult, uploadsResult, reportsResult, farmsResult] = results;
-
-      if (profileResult.status === 'fulfilled') {
-        setProfile(profileResult.value);
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        loadAuthenticatedData();
+      } catch {
+        window.localStorage.removeItem('agrivision_user');
+        clearSessionData();
       }
-      if (uploadsResult.status === 'fulfilled') {
-        setUploads(Array.isArray(uploadsResult.value?.items) ? uploadsResult.value.items : []);
-      }
-      if (reportsResult.status === 'fulfilled') {
-        setReports(Array.isArray(reportsResult.value?.items) ? reportsResult.value.items : []);
-      }
-      if (farmsResult.status === 'fulfilled') {
-        setFarms(Array.isArray(farmsResult.value?.items) ? farmsResult.value.items : []);
-      }
-    });
+    } else {
+      clearSessionData();
+    }
 
     return () => window.clearTimeout(splashTimer);
   }, []);
@@ -53,10 +64,13 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     setLoading(true);
     try {
+      clearSessionData();
       const loggedInUser = await loginWithEmail(email, password);
       persistUser(loggedInUser);
+      await loadAuthenticatedData();
       return { success: true };
     } catch (error) {
+      clearSessionData();
       return { success: false, message: error.message };
     } finally {
       setLoading(false);
@@ -66,10 +80,13 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     setLoading(true);
     try {
+      clearSessionData();
       const loggedInUser = await registerWithEmail(name, email, password);
       persistUser(loggedInUser);
+      await loadAuthenticatedData();
       return { success: true };
     } catch (error) {
+      clearSessionData();
       return { success: false, message: error.message };
     } finally {
       setLoading(false);
@@ -79,6 +96,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     await logoutUser();
     setUser(null);
+    clearSessionData();
     window.localStorage.removeItem('agrivision_user');
   };
 
