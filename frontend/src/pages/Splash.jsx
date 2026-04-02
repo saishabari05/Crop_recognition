@@ -3,20 +3,20 @@ import logo from '../assets/logo.png';
 
 function Splash() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-cream px-6">
+    <div className="flex min-h-screen items-center justify-center bg-white px-6">
       <div className="text-center">
         <motion.img
           initial={{ opacity: 0, scale: 0.88, rotate: -6 }}
           animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 1.1, ease: 'easeOut' }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
           src={logo}
           alt="AgriVision logo"
-          className="mx-auto h-28 w-28 rounded-[2rem] bg-cream p-2 object-contain shadow-xl"
+          className="mx-auto h-36 w-36 rounded-[2.4rem] bg-white p-3 object-contain shadow-[0_18px_40px_-28px_rgba(49,82,55,0.28)]"
         />
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
           className="mt-8 text-6xl text-text-dark"
         >
           AgriVision

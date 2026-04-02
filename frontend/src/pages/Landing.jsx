@@ -129,19 +129,22 @@ function Landing() {
                 <div className="rounded-[1.6rem] bg-text-dark p-5 text-white">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="panel-label !text-white/55">What the user sees</p>
-                      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.02em]">A calmer analysis screen</h2>
+                      <p className="panel-label !text-white/55">Inside the app</p>
+                      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.02em]">One upload. One clear result.</h2>
                     </div>
                     <span className="ai-dot" />
                   </div>
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <div className="mt-6 rounded-[1.25rem] bg-white/6 p-4">
+                    <p className="text-sm text-white/70">The product stays focused on the next useful step instead of filling the screen with extra panels.</p>
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     {[
-                      ['Upload', 'Image + location'],
-                      ['Weather', 'Resolved automatically'],
-                      ['LLM', 'Practical recommendation'],
-                      ['Chat', 'Follow-up context'],
+                      ['Upload', 'Leaf image and location'],
+                      ['Weather', 'Added in the background'],
+                      ['Advice', 'Short treatment summary'],
+                      ['Follow-up', 'Open report or chat'],
                     ].map(([title, subtitle]) => (
-                      <div key={title} className="rounded-2xl bg-white/8 p-4">
+                      <div key={title} className="rounded-2xl border border-white/10 bg-white/4 p-4">
                         <p className="text-sm font-medium text-white">{title}</p>
                         <p className="mt-2 text-sm text-white/65">{subtitle}</p>
                       </div>
@@ -151,19 +154,19 @@ function Landing() {
 
                 <div className="grid gap-4">
                   <div className="rounded-[1.6rem] bg-beige p-5">
-                    <p className="panel-label">Response style</p>
+                    <p className="panel-label">What users get</p>
                     <div className="mt-4 flex items-end justify-between">
-                      <p className="text-4xl font-bold tracking-[-0.03em] text-text-dark">Short</p>
-                      <span className="rounded-full bg-moss-pale px-3 py-1 text-xs font-semibold text-moss">Clear</span>
+                      <p className="text-4xl font-bold tracking-[-0.03em] text-text-dark">Clear</p>
+                      <span className="rounded-full bg-moss-pale px-3 py-1 text-xs font-semibold text-moss">Practical</span>
                     </div>
                     <div className="mt-6 rounded-2xl bg-white px-4 py-4 text-sm leading-7 text-text-mid">
-                      The home page should explain the product, not the workflow in detail. The workflow belongs after the user enters the platform.
+                      Disease name, confidence, and the next action show up without making the user read through a long workflow first.
                     </div>
                   </div>
                   <div className="rounded-[1.6rem] bg-moss-pale p-5">
-                    <p className="panel-label">What happens next</p>
+                    <p className="panel-label">Next step</p>
                     <p className="mt-4 text-lg font-medium leading-8 text-text-dark">
-                      After login, users go to Upload, review the result, then open reports or chat for follow-up.
+                      After login, users upload an image, check the result, and only then open reports or chat if they need more detail.
                     </p>
                     <div className="mt-5 flex flex-wrap gap-2">
                       <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-text-mid">Upload</span>
@@ -180,8 +183,8 @@ function Landing() {
               transition={{ ...ambient, delay: 0.5 }}
               className="absolute -right-2 top-10 hidden rounded-full bg-white px-4 py-3 shadow-md md:block"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-text-muted">AI synced</p>
-              <p className="mt-1 text-sm font-medium text-moss">18 live signals</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-text-muted">Field ready</p>
+              <p className="mt-1 text-sm font-medium text-moss">Live crop context</p>
             </motion.div>
           </div>
         </section>

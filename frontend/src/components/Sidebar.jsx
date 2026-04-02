@@ -35,11 +35,11 @@ function SidebarContent({ onClose }) {
   return (
     <div className="flex h-full flex-col">
       <div className="mb-6 flex items-start justify-between gap-3">
-        <div className="min-w-0 flex items-center gap-3">
-          <img src={logo} alt="AgriVision logo" className="h-11 w-11 flex-shrink-0 rounded-2xl bg-white p-1 object-contain shadow-md" />
+        <div className="min-w-0 flex items-center gap-4 rounded-3xl bg-white/80 px-3 py-3 shadow-sm ring-1 ring-[#e7dfd2]">
+          <img src={logo} alt="AgriVision logo" className="h-12 w-12 flex-shrink-0 rounded-2xl bg-[#fbf7ef] p-1.5 object-contain shadow-sm" />
           <div className="min-w-0">
-            <p className="truncate text-[1.15rem] font-semibold leading-tight tracking-[-0.02em] text-text-dark">AgriVision</p>
-            <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-text-muted">Crop Intelligence OS</p>
+            <p className="truncate text-[1.45rem] font-semibold leading-none tracking-[-0.03em] text-text-dark">AgriVision</p>
+            <p className="mt-1.5 text-[0.68rem] uppercase tracking-[0.24em] text-text-muted">Crop Intelligence OS</p>
           </div>
         </div>
         {onClose && (
