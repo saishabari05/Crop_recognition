@@ -67,10 +67,16 @@ function Register() {
         <div className="bg-white px-6 py-10 sm:px-10 lg:px-14">
           <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.1 } } }} className="mx-auto max-w-md">
             <motion.div variants={itemVariants}>
-              <Link to="/login" className="text-sm font-medium text-text-muted">
-                Back to login
-              </Link>
-              <img src={logo} alt="AgriVision logo" className="mt-6 h-14 w-14 rounded-3xl bg-white p-1 object-contain shadow-md" />
+              <div className="text-sm font-medium">
+                <Link to="/login" className="text-text-muted">
+                  Back to login
+                </Link>
+                <div className="mt-6 flex justify-center">
+                  <span className="text-[0.82rem] font-semibold uppercase tracking-[0.28em] text-[#8da52b]">
+                    AgriVision
+                  </span>
+                </div>
+              </div>
               <h2 className="mt-6 text-4xl font-semibold tracking-[-0.03em]">Create account</h2>
               <p className="mt-3 text-text-mid">Set up your AgriVision account with email and password.</p>
             </motion.div>
