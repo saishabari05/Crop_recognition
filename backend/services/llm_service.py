@@ -1,13 +1,21 @@
 import os
+from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List
 
 import httpx
+from dotenv import load_dotenv
 
 try:
     from groq import Groq
 except Exception:
     Groq = None
+
+
+_backend_path = Path(__file__).resolve().parent.parent
+_project_root = _backend_path.parent
+load_dotenv(_project_root / ".env")
+load_dotenv(_backend_path / ".env")
 
 
 GROQ_TEMPERATURE = 0.3

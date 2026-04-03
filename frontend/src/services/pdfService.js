@@ -158,6 +158,75 @@ function addReportImage(doc, image, imageName, startY, options = {}) {
   return yPosition + frameHeight + caption.length * 3 + 6;
 }
 
+function addExplanationImages(doc, originalImage, gradcamImage, imageName, startY, options = {}) {
+  if (!originalImage && !gradcamImage) return startY;
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = options.margin ?? 15;
+  const gap = 8;
+  const frameHeight = options.frameHeight ?? 62;
+  const frameWidth = (pageWidth - margin * 2 - gap) / 2;
+  let yPosition = startY;
+
+  if (yPosition + frameHeight + 20 > pageHeight - 15) {
+    doc.addPage();
+    yPosition = margin;
+  }
+
+  const drawFrame = (image, x, y, title, captionText) => {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(80, 80, 80);
+    doc.text(title, x, y - 2);
+
+    doc.setFillColor(252, 249, 243);
+    doc.setDrawColor(205, 192, 174);
+    doc.roundedRect(x, y, frameWidth, frameHeight, 4, 4, 'FD');
+
+    if (image) {
+      const imageRatio = image.width / image.height;
+      const frameRatio = frameWidth / frameHeight;
+      let drawWidth = frameWidth - 6;
+      let drawHeight = frameHeight - 6;
+
+      if (imageRatio > frameRatio) {
+        drawHeight = drawWidth / imageRatio;
+      } else {
+        drawWidth = drawHeight * imageRatio;
+      }
+
+      const imageX = x + (frameWidth - drawWidth) / 2;
+      const imageY = y + (frameHeight - drawHeight) / 2;
+      doc.addImage(image.dataUrl, 'JPEG', imageX, imageY, drawWidth, drawHeight);
+    }
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(110, 110, 110);
+    const caption = doc.splitTextToSize(safeText(captionText, 'image'), frameWidth);
+    doc.text(caption, x + frameWidth / 2, y + frameHeight + 6, { align: 'center' });
+    return caption.length;
+  };
+
+  const leftCaptionLines = drawFrame(
+    originalImage,
+    margin,
+    yPosition,
+    'Original Image',
+    imageName || 'uploaded-image',
+  );
+  const rightCaptionLines = drawFrame(
+    gradcamImage,
+    margin + frameWidth + gap,
+    yPosition,
+    'Grad-CAM Explanation',
+    gradcamImage ? 'Model attention map' : 'Not available',
+  );
+
+  return yPosition + frameHeight + Math.max(leftCaptionLines, rightCaptionLines) * 3 + 8;
+}
+
 export async function downloadReportPdf(report) {
   try {
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -166,6 +235,7 @@ export async function downloadReportPdf(report) {
     const margin = 15;
     let yPosition = 15;
     const reportImage = await loadImageForPdf(report?.imagePreviewUrl).catch(() => null);
+    const gradcamImage = await loadImageForPdf(report?.gradcamImage || report?.gradcam_image).catch(() => null);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(20);
@@ -204,12 +274,11 @@ export async function downloadReportPdf(report) {
       yPosition,
     );
 
-    if (reportImage) {
+    if (reportImage || gradcamImage) {
       yPosition += 2;
-      yPosition = addReportImage(doc, reportImage, report?.imageName, yPosition, {
+      yPosition = addExplanationImages(doc, reportImage, gradcamImage, report?.imageName, yPosition, {
         margin,
-        frameWidth: 110,
-        frameHeight: 76,
+        frameHeight: 62,
       });
     }
 

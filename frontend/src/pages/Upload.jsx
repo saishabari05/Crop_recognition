@@ -94,6 +94,7 @@ function Upload() {
         uploadedAt: new Date().toISOString(),
         imageName,
         imagePreviewUrl,
+        gradcamImage: response.gradcam_image || null,
       };
       addUploadResult(uploadRecord);
 
@@ -111,6 +112,7 @@ function Upload() {
         ...generatedReport,
         imageName,
         imagePreviewUrl,
+        gradcamImage: response.gradcam_image || null,
       };
       addReport(reportRecord);
 
@@ -124,6 +126,7 @@ function Upload() {
         coordinates: [response?.lat ?? null, response?.lon ?? null],
         recommendation: response.recommendation,
         summary: response.recommendation,
+        gradcamImage: response.gradcam_image || null,
       });
       setSubmitted(true);
     } catch (apiError) {
@@ -233,6 +236,23 @@ function Upload() {
                   compact
                 />
               </div>
+            </div>
+            <div className="mt-6 rounded-2xl border border-sand bg-beige p-4">
+              <p className="text-sm uppercase tracking-[0.14em] text-text-muted">Grad-CAM visual explanation</p>
+              <p className="mt-2 text-sm text-text-mid">
+                This highlights image regions that most influenced the CNN disease classification.
+              </p>
+              {result.gradcamImage ? (
+                <img
+                  src={result.gradcamImage}
+                  alt="Grad-CAM explanation for the uploaded leaf image"
+                  className="mt-4 w-full rounded-xl border border-sand object-contain"
+                />
+              ) : (
+                <p className="mt-4 text-sm text-text-muted">
+                  Visual explanation unavailable for this image. Classification results are still valid.
+                </p>
+              )}
             </div>
           </Card>
           <Button className="mt-6" onClick={() => downloadReportPdf(result)}>
