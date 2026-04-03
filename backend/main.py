@@ -10,12 +10,16 @@ backend_path = Path(__file__).resolve().parent
 if str(backend_path) not in sys.path:
     sys.path.insert(0, str(backend_path))
 
+project_root = backend_path.parent
+
+# Load env early so imported modules can read runtime configuration.
+load_dotenv(project_root / ".env")
+load_dotenv(backend_path / ".env")
+
 from routes.analyze import router as analyze_router
 from routes.chat import router as chat_router
 from routes.auth import router as auth_router
 from routes.data import router as data_router
-
-load_dotenv(backend_path / ".env")
 
 # Initialize database only when explicitly enabled.
 if os.getenv("INIT_DB", "false").lower() == "true":

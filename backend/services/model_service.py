@@ -87,6 +87,14 @@ def _load_model() -> Callable[[bytes], dict]:
     return module.predict_disease
 
 
+def _normalize_result(result: dict) -> Tuple[str, str, float, Optional[str]]:
+    crop = result["crop"]
+    disease = result["disease"]
+    confidence = float(result["confidence"])
+    gradcam_image = result.get("gradcam_image")
+    return crop, disease, confidence, gradcam_image
+
+
 def predict_disease(image_bytes: bytes) -> Tuple[str, str, float]:
     global _MODEL
 
@@ -94,4 +102,15 @@ def predict_disease(image_bytes: bytes) -> Tuple[str, str, float]:
         _MODEL = _load_model()
 
     result = _MODEL(image_bytes)
-    return result["crop"], result["disease"], float(result["confidence"])
+    crop, disease, confidence, _gradcam_image = _normalize_result(result)
+    return crop, disease, confidence
+
+
+def predict_disease_with_gradcam(image_bytes: bytes) -> Tuple[str, str, float, Optional[str]]:
+    global _MODEL
+
+    if _MODEL is None:
+        _MODEL = _load_model()
+
+    result = _MODEL(image_bytes)
+    return _normalize_result(result)

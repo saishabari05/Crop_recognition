@@ -13,7 +13,7 @@ from services.alert_service import generate_alerts
 from services.data_store import store
 from services.llm_service import get_recommendation
 from services.location_service import geocode_location
-from services.model_service import predict_disease
+from services.model_service import predict_disease_with_gradcam
 from services.severity_service import compute_health_score, compute_severity
 from services.weather_service import get_weather
 from utils.session import session_store
@@ -35,7 +35,7 @@ async def analyze_image(
     except ValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    crop, disease, confidence = predict_disease(image_bytes)
+    crop, disease, confidence, gradcam_image = predict_disease_with_gradcam(image_bytes)
 
     severity = compute_severity(confidence=confidence, disease=disease)
     health_score = compute_health_score(confidence=confidence)
@@ -146,6 +146,7 @@ async def analyze_image(
         "crop": crop,
         "disease": disease,
         "confidence": confidence,
+        "gradcam_image": gradcam_image,
         "severity": severity,
         "health_score": health_score,
         "alerts": alerts,

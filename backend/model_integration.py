@@ -161,6 +161,7 @@
 
 from __future__ import annotations
 
+import base64
 from dataclasses import dataclass
 from io import BytesIO
 import os
@@ -170,12 +171,16 @@ from typing import Dict
 from PIL import Image
 
 try:
+    import numpy as np
     import torch
     import torch.nn as nn
+    import torch.nn.functional as F
     from torchvision import models, transforms
 except Exception:
+    np = None
     torch = None
     nn = None
+    F = None
     models = None
     transforms = None
 
@@ -310,6 +315,121 @@ def run_inference(model: object, image: Image.Image) -> PredictionResult:
     )
 
 
+def _build_leaf_mask(image_np: np.ndarray) -> np.ndarray:
+    rgb = image_np.astype(np.float32) / 255.0
+    red = rgb[:, :, 0]
+    green = rgb[:, :, 1]
+    blue = rgb[:, :, 2]
+
+    excess_green = (2.0 * green) - red - blue
+    vegetation_mask = (excess_green > 0.04) & (green > 0.18)
+
+    mask_ratio = float(vegetation_mask.mean())
+    if mask_ratio < 0.05:
+        return np.ones((image_np.shape[0], image_np.shape[1]), dtype=np.float32)
+
+    return vegetation_mask.astype(np.float32)
+
+
+def _cam_to_heat_rgb(cam: np.ndarray) -> np.ndarray:
+    r = np.clip(1.5 * cam, 0.0, 1.0)
+    g = np.clip(1.8 * (cam - 0.15), 0.0, 1.0)
+    b = np.clip(1.4 * (0.7 - cam), 0.0, 1.0)
+    return np.stack([r, g, b], axis=2)
+
+
+def _to_data_url(image_np: np.ndarray) -> str:
+    image_uint8 = np.clip(image_np * 255.0, 0, 255).astype(np.uint8)
+    image = Image.fromarray(image_uint8)
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
+
+
+def _resolve_gradcam_target_layer(model: object) -> object:
+    # EfficientNet-B3: use a finer feature block than the very last conv output.
+    return model.features[-2]
+
+
+def generate_gradcam_image(model: object, image: Image.Image) -> str | None:
+    if torch is None or F is None or np is None:
+        return None
+
+    activations: dict[str, torch.Tensor] = {}
+    gradients: dict[str, torch.Tensor] = {}
+    target_layer = _resolve_gradcam_target_layer(model)
+
+    def _forward_hook(_module, _inputs, output):
+        activations["value"] = output
+
+    def _backward_hook(_module, _grad_input, grad_output):
+        gradients["value"] = grad_output[0]
+
+    forward_handle = target_layer.register_forward_hook(_forward_hook)
+    backward_handle = target_layer.register_full_backward_hook(_backward_hook)
+
+    try:
+        model.zero_grad(set_to_none=True)
+        input_tensor = _build_transform()(image).unsqueeze(0)
+        output = model(input_tensor)
+        if isinstance(output, (tuple, list)):
+            output = output[0]
+
+        predicted_idx = int(torch.argmax(output, dim=1).item())
+        score = output[0, predicted_idx]
+        score.backward()
+
+        if "value" not in activations or "value" not in gradients:
+            return None
+
+        act = activations["value"][0]
+        grad = gradients["value"][0]
+
+        weights = grad.mean(dim=(1, 2), keepdim=True)
+        cam = (weights * act).sum(dim=0)
+        cam = torch.relu(cam)
+
+        cam = cam.unsqueeze(0).unsqueeze(0)
+        cam = F.interpolate(
+            cam,
+            size=(image.height, image.width),
+            mode="bilinear",
+            align_corners=False,
+        )[0, 0]
+
+        cam_np = cam.detach().cpu().numpy().astype(np.float32)
+        max_value = float(cam_np.max())
+        if max_value <= 0.0:
+            return None
+
+        cam_np /= max_value
+        threshold = float(np.percentile(cam_np, 80))
+        cam_np = np.where(cam_np >= threshold, cam_np, 0.0)
+
+        image_np = np.array(image).astype(np.uint8)
+        leaf_mask = _build_leaf_mask(image_np)
+        cam_np = cam_np * leaf_mask
+
+        masked_max = float(cam_np.max())
+        if masked_max <= 0.0:
+            return None
+
+        cam_np /= masked_max
+        cam_np = np.power(cam_np, 0.75)
+
+        heat_rgb = _cam_to_heat_rgb(cam_np)
+        base_rgb = image_np.astype(np.float32) / 255.0
+        alpha = (0.15 + 0.65 * cam_np)[..., None]
+        overlay = base_rgb * (1.0 - alpha) + heat_rgb * alpha
+
+        return _to_data_url(overlay)
+    finally:
+        forward_handle.remove()
+        backward_handle.remove()
+        model.zero_grad(set_to_none=True)
+
+
 _MODEL: object | None = None
 
 
@@ -324,4 +444,13 @@ def predict_disease(image_bytes: bytes) -> Dict[str, str | float]:
     model = get_model()
     image = preprocess_image(image_bytes)
     result = run_inference(model, image)
-    return result.to_dict()
+    response = result.to_dict()
+
+    gradcam_image = None
+    try:
+        gradcam_image = generate_gradcam_image(model, image)
+    except Exception:
+        gradcam_image = None
+
+    response["gradcam_image"] = gradcam_image
+    return response
