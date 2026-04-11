@@ -12,6 +12,7 @@ class DataStore:
         self._uploads: List[Dict[str, Any]] = []
         self._reports: List[Dict[str, Any]] = []
         self._farms: List[Dict[str, Any]] = []
+        self._registered_emails: set[str] = set()
         self._profile: Dict[str, Any] = {
             "id": "user-local",
             "name": "AgriVision User",
@@ -195,6 +196,18 @@ class DataStore:
             "stats": stats,
             "description": "Live operational summary generated from recent disease analyses and reports.",
         }
+
+    def register_email(self, email: str) -> None:
+        if not email:
+            return
+        with self._lock:
+            self._registered_emails.add(email.lower())
+
+    def is_email_registered(self, email: str) -> bool:
+        if not email:
+            return False
+        with self._lock:
+            return email.lower() in self._registered_emails
 
 
 store = DataStore()

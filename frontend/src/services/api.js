@@ -116,4 +116,11 @@ export function registerWithEmailApi(payload) {
   });
 }
 
+export function loginWithGoogleApi(payload) {
+  return request('/auth/google', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 export { API_BASE_URL };

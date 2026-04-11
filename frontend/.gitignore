@@ -3,4 +3,12 @@ dist
 .env
 .env.local
 .DS_Store
-
+.venv/
+__pycache__/
+*.pyc
+backend/.env
+frontend/.env
+backend/firebase-key.json
+backend/services/firebase-key.json
+.vscode/
+.DS_Store

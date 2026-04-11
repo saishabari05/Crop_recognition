@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "firebase": "^11.6.0",
+    "firebase": "^11.10.0",
     "framer-motion": "^12.6.3",
     "html2pdf.js": "^0.10.3",
     "jspdf": "^3.0.1",
