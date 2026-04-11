@@ -1,4 +1,6 @@
-import { loginWithEmailApi, registerWithEmailApi, updateProfile as updateProfileApi } from './api';
+import { signInWithPopup } from 'firebase/auth';
+import { loginWithEmailApi, loginWithGoogleApi, registerWithEmailApi, updateProfile as updateProfileApi } from './api';
+import { auth, googleProvider } from './firebase';
 
 export async function loginWithEmail(email, password) {
   if (!email || !password) {
@@ -38,5 +40,22 @@ export async function updateProfile(profile) {
 
 export async function logoutUser() {
   return Promise.resolve();
+}
+
+export async function loginWithGoogle() {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const idToken = await result.user.getIdToken();
+    const response = await loginWithGoogleApi({ id_token: idToken });
+    if (!response?.user) {
+      throw new Error('Invalid Google login response from backend.');
+    }
+    return { ...response.user, token: response.access_token };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Google sign-in failed. Please try again.');
+  }
 }
 

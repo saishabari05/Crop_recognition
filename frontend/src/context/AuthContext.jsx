@@ -4,6 +4,7 @@ import {
   loginWithEmail,
   logoutUser,
   registerWithEmail,
+  loginWithGoogle as loginWithGoogleService,
   updateProfile as updateProfileService,
 } from '../services/authService';
 import { createFarm as createFarmApi, deleteFarm as deleteFarmApi, deleteReport as deleteReportApi, fetchFarms, fetchProfile, fetchReports, fetchUploads, updateFarm as updateFarmApi } from '../services/api';
@@ -61,6 +62,19 @@ export function AuthProvider({ children }) {
     window.localStorage.setItem('agrivision_user', JSON.stringify(nextUser));
   };
 
+  const normalizeErrorMessage = (error) => {
+    const raw = error?.message ?? 'Something went wrong. Please try again.';
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && parsed.detail) {
+        return String(parsed.detail);
+      }
+    } catch {
+      // Not JSON, fall through
+    }
+    return raw;
+  };
+
   const login = async (email, password) => {
     setLoading(true);
     try {
@@ -71,7 +85,23 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (error) {
       clearSessionData();
-      return { success: false, message: error.message };
+      return { success: false, message: normalizeErrorMessage(error) };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    setLoading(true);
+    try {
+      clearSessionData();
+      const loggedInUser = await loginWithGoogleService();
+      persistUser(loggedInUser);
+      await loadAuthenticatedData();
+      return { success: true };
+    } catch (error) {
+      clearSessionData();
+      return { success: false, message: normalizeErrorMessage(error) };
     } finally {
       setLoading(false);
     }
@@ -87,7 +117,7 @@ export function AuthProvider({ children }) {
       return { success: true };
     } catch (error) {
       clearSessionData();
-      return { success: false, message: error.message };
+      return { success: false, message: normalizeErrorMessage(error) };
     } finally {
       setLoading(false);
     }
@@ -152,6 +182,7 @@ export function AuthProvider({ children }) {
       reports,
       farms,
       login,
+      loginWithGoogle,
       register,
       logout,
       forgotPassword,

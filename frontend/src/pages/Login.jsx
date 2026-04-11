@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Leaf, Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, Leaf, Lock, Mail, Chrome } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
@@ -17,7 +17,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState({});
-  const { login, forgotPassword, loading } = useAuth();
+  const { login, loginWithGoogle, forgotPassword, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -137,6 +137,26 @@ function Login() {
               <motion.div variants={itemVariants}>
                 <Button type="submit" className="w-full" disabled={loading}>
                   Sign in
+                </Button>
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="mt-3">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="flex w-full items-center justify-center gap-2"
+                  disabled={loading}
+                  onClick={async () => {
+                    const result = await loginWithGoogle();
+                    if (!result.success) {
+                      setMessage(result.message ?? 'Google sign-in failed.');
+                      return;
+                    }
+                    navigate(location.state?.from ?? '/overview');
+                  }}
+                >
+                  <Chrome className="h-4 w-4" />
+                  Continue with Google
                 </Button>
               </motion.div>
 

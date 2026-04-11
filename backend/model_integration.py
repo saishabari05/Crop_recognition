@@ -166,7 +166,7 @@ from dataclasses import dataclass
 from io import BytesIO
 import os
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 from PIL import Image
 
@@ -191,7 +191,7 @@ class PredictionResult:
     disease: str
     confidence: float
 
-    def to_dict(self) -> Dict[str, str | float]:
+    def to_dict(self) -> Dict[str, Union[str, float]]:
         return {
             "crop": self.crop,
             "disease": self.disease,
@@ -263,10 +263,6 @@ def _build_transform():
         [
             transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
             transforms.ToTensor(),
-            # transforms.Normalize(
-            #     mean=[0.485, 0.456, 0.406],
-            #     std=[0.229, 0.224, 0.225],
-            # ),
         ]
     )
 
@@ -348,16 +344,16 @@ def _to_data_url(image_np: np.ndarray) -> str:
 
 
 def _resolve_gradcam_target_layer(model: object) -> object:
-    # EfficientNet-B3: use a finer feature block than the very last conv output.
     return model.features[-2]
 
 
-def generate_gradcam_image(model: object, image: Image.Image) -> str | None:
+def generate_gradcam_image(model: object, image: Image.Image) -> Union[str, None]:
     if torch is None or F is None or np is None:
         return None
 
-    activations: dict[str, torch.Tensor] = {}
-    gradients: dict[str, torch.Tensor] = {}
+    activations: Dict[str, torch.Tensor] = {}
+    gradients: Dict[str, torch.Tensor] = {}
+
     target_layer = _resolve_gradcam_target_layer(model)
 
     def _forward_hook(_module, _inputs, output):
@@ -373,6 +369,7 @@ def generate_gradcam_image(model: object, image: Image.Image) -> str | None:
         model.zero_grad(set_to_none=True)
         input_tensor = _build_transform()(image).unsqueeze(0)
         output = model(input_tensor)
+
         if isinstance(output, (tuple, list)):
             output = output[0]
 
@@ -424,13 +421,14 @@ def generate_gradcam_image(model: object, image: Image.Image) -> str | None:
         overlay = base_rgb * (1.0 - alpha) + heat_rgb * alpha
 
         return _to_data_url(overlay)
+
     finally:
         forward_handle.remove()
         backward_handle.remove()
         model.zero_grad(set_to_none=True)
 
 
-_MODEL: object | None = None
+_MODEL: Union[object, None] = None
 
 
 def get_model() -> object:
@@ -440,7 +438,7 @@ def get_model() -> object:
     return _MODEL
 
 
-def predict_disease(image_bytes: bytes) -> Dict[str, str | float]:
+def predict_disease(image_bytes: bytes) -> Dict[str, Union[str, float]]:
     model = get_model()
     image = preprocess_image(image_bytes)
     result = run_inference(model, image)

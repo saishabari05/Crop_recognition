@@ -7,4 +7,5 @@ __pycache__/
 *.pyc
 *.pt
 agrivision-*-firebase-adminsdk-*.json
-
+backend/firebase-key.json
+backend/services/firebase-key.json
